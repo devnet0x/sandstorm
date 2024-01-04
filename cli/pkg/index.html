@@ -1,13 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Factorial Calculator</title>
+    <title>SandStorm Wasm Verifier</title>
 </head>
 <body>
-    <h1>Factorial Calculator</h1>
-    <input type="number" id="numberInput" placeholder="Enter a number">
-    <button id="calculateButton">Calculate</button>
+    <h1>SandStorm Wasm Verifier</h1>
+    <table>
+        <tr>
+            <td>Program</td>
+            <td><input type="file" id="program"></td>
+        </tr>
+        <tr>
+            <td>Public Input</td>
+            <td><input type="file" id="publicInput"></td>
+        </tr>
+        <tr>
+            <td>Proof</td>
+            <td><input type="file" id="proof"></td>
+        </tr>
+    </table>  
+    <button id="verifyButton">Verify</button>
     <p>Result: <span id="result"></span></p>
+    <hr>
+    <table>
+        <tr>
+            <td>Program</td>
+            <td><input type="file" id="program1"></td>
+        </tr>
+        <tr>
+            <td>Public Input</td>
+            <td><input type="file" id="publicInput1"></td>
+        </tr>
+        <tr>
+            <td>Trace</td>
+            <td><input type="file" id="trace1"></td>
+        </tr>
+        <tr>
+            <td>Trace</td>
+            <td><input type="file" id="memory1"></td>
+        </tr>
+    </table>  
+    <button id="proofButton">Proof</button>
+    <p>Result: <span id="result1"></span></p>
     <script type="module" src="./bootstrap.js"></script>
 </body>
 </html>
