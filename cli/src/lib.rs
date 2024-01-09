@@ -1,9 +1,10 @@
 use wasm_bindgen::prelude::*;
 use std::io::Cursor;
-use web_sys::console;
+//use web_sys::console;
 use serde_json::Value;
 use serde_json::from_str;
 use hex;
+use wasm_timer::Instant;
 
 use ark_ff::Field;
 use ark_ff::PrimeField;
@@ -21,10 +22,10 @@ use ministark::Proof;
 use ministark::ProofOptions;
 use ministark_gpu::fields::p3618502788666131213697322783095070105623107215331596699973092056135872020481;
 use sandstorm::claims;
-use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
-use std::time::Instant;
+//use std::fs::File;
+//use std::io::Write;
+//use std::path::PathBuf;
+//use std::time::Instant;
 use structopt::StructOpt;
 
 
@@ -70,20 +71,24 @@ pub fn start() {
 }
 
 #[wasm_bindgen]
-pub fn main2(command: String, 
+pub async fn main2(command: String, 
     program_json_str: String,
     air_public_input_json_str: String,
-    proof_file: &[u8], 
-    trace_file: &[u8],
-    memory_file: &[u8],
-    air_private_input_json_str: String) -> Vec<u8> {
-    //log_bytes(binary_data);
+    _proof_file: Option<Vec<u8>>, 
+    _trace_file: Option<Vec<u8>>,
+    _memory_file: Option<Vec<u8>>,
+    _air_private_input_json_str: Option<String>) -> String {
+    
+    let proof_file: &[u8] = &_proof_file.unwrap_or_else(Vec::new);
+    let trace_file: &[u8] = &_trace_file.unwrap_or_else(Vec::new);
+    let memory_file: &[u8] = &_memory_file.unwrap_or_else(Vec::new);
+    let air_private_input_json_str = _air_private_input_json_str.unwrap_or("".to_string());
+ 
     // Parse the command
-    //web_sys::console::log_1(&JsValue::from_str(line!().to_string().as_str()));
-    web_sys::console::log_1(&JsValue::from_str("010"));
-    let output_str = "".to_string();
     let command: Command = match command.as_str() {
-        "Verify" => Command::Verify { required_security_bits: 80 },
+        "Verify" => Command::Verify { 
+            required_security_bits: 80 
+        },
         "Prove" => Command::Prove {
             num_queries: 65,
             lde_blowup_factor: 2,
@@ -93,32 +98,24 @@ pub fn main2(command: String,
         },
         _ => panic!("Unknown command"),
     };
-    web_sys::console::log_1(&JsValue::from_str("020"));
-    let air_public_input_json: JsValue = JsValue::from_str(&air_public_input_json_str);
-    web_sys::console::log_1(&JsValue::from_str("030"));
-    let data_str: String = air_public_input_json.as_string().unwrap();
-    let data_reader = Cursor::new(data_str);
-    web_sys::console::log_1(&JsValue::from_str("040"));
+    
     // TODO: Read prime field from program_json_str json string
     let prime: String = "0x800000000000011000000000000000000000000000000000000000000000001".to_string();
     match prime.to_lowercase().as_str() {
         STARKWARE_PRIME_HEX_STR => {
             use p3618502788666131213697322783095070105623107215331596699973092056135872020481::ark::Fp;
             let program: CompiledProgram<Fp> = serde_json::from_value(convert_string_to_value(&program_json_str).unwrap()).unwrap();
-            let air_public_input: AirPublicInput<Fp> =
-                serde_json::from_reader(data_reader).unwrap();
+            let air_public_input: AirPublicInput<Fp> = serde_json::from_reader(Cursor::new(air_public_input_json_str)).unwrap();
             match air_public_input.layout {
                 Layout::Starknet => {
                     use claims::starknet::EthVerifierClaim;
                     let claim = EthVerifierClaim::new(program, air_public_input);
-                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str, output_str)
+                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str).await
                 }
                 Layout::Recursive => {
                     use claims::recursive::CairoVerifierClaim;
-                    web_sys::console::log_1(&JsValue::from_str("050"));
                     let claim = CairoVerifierClaim::new(program, air_public_input);
-                    web_sys::console::log_1(&JsValue::from_str("060"));
-                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str, output_str)
+                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str).await
                 }
                 _ => unimplemented!(),
             }
@@ -158,15 +155,14 @@ pub fn main2(command: String,
     }
 }
 
-fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
+async fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
     command: Command,
     claim: Claim,
     proof_file: &[u8],
     trace_file: &[u8],
     memory_file: &[u8],
     air_private_input: String,
-    output: String,
-) -> Vec<u8> {
+) -> String {
     match command {
         Command::Prove {
             num_queries,
@@ -182,8 +178,7 @@ fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<
                 fri_folding_factor,
                 fri_max_remainder_coeffs,
             );
-            web_sys::console::log_1(&JsValue::from_str("070"));
-            prove(options, air_private_input, &trace_file, &memory_file, &output, claim)
+            prove(options, air_private_input, &trace_file, &memory_file, claim).await
         }
         Command::Verify {
             required_security_bits,
@@ -191,67 +186,63 @@ fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<
     }
 }
 
-#[wasm_bindgen]
-pub fn log_bytes(bytes: &[u8]) {
-    let s = hex::encode(bytes);
+pub fn log_bytes(bytes: &[u8]) -> String {
+    let s:String = hex::encode(bytes);
+    s
 }
 
 fn verify<Claim: Stark<Fp = impl Field>>(
     required_security_bits: u8,
     proof_bytes: &[u8],
     claim: Claim,
-) -> Vec<u8> {
-    //log_bytes(proof_bytes);
+) -> String {
     let proof = Proof::<Claim>::deserialize_compressed(&*proof_bytes).unwrap();
-    //let now = window().unwrap().performance().unwrap().now();    
+    let now = Instant::now();    
     claim.verify(proof, required_security_bits.into()).unwrap();
-    //let elapsed = window().unwrap().performance().unwrap().now() - now;
-
-    //println!("Proof verified in: {:?}", elapsed);
-    0u8.to_be_bytes().to_vec()
+    web_sys::console::log_1(&JsValue::from_str(&format!("Proof verified in: {:?}", now.elapsed())));
+    "0".to_string()
 }
 
-fn prove<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
+async fn prove<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
     options: ProofOptions,
     private_input_file: String,
     trace_file: &[u8],
     memory_file: &[u8],
-    output_path: &String,
     claim: Claim,
-) -> Vec<u8> {
+) -> String {
     //let private_input_file =
     //    File::open(private_input_path).expect("could not open private input file");
-    web_sys::console::log_1(&JsValue::from_str("080"));
     let private_input: AirPrivateInput = serde_json::from_reader(private_input_file.as_bytes()).unwrap();
 
     //let trace_path = &private_input.trace_path;
     //let trace_file = File::open(trace_path).expect("could not open trace file");
-    web_sys::console::log_1(&JsValue::from_str("090"));
     let register_states = RegisterStates::from_reader(trace_file);
 
     //let memory_path = &private_input.memory_path;
     //let memory_file = File::open(memory_path).expect("could not open memory file");
-    web_sys::console::log_1(&JsValue::from_str("100"));
-    let memory = Memory::from_reader(memory_file);
+    let memory : Memory<Fp> = Memory::from_reader(memory_file);
 
-    web_sys::console::log_1(&JsValue::from_str("110"));
     let witness = CairoWitness::new(private_input, register_states, memory);
 
-    //let now = Instant::now();
-    web_sys::console::log_1(&JsValue::from_str("120"));
-    let proof = pollster::block_on(claim.prove(options, witness)).unwrap();
-    //println!("Proof generated in: {:?}", now.elapsed());
-    web_sys::console::log_1(&JsValue::from_str("130"));
+    let now = Instant::now();
+    let a=claim.prove(options, witness);
+    let proof = match a.await {
+        Ok(proof) => {
+            proof
+        },
+        Err(e) => {
+            web_sys::console::log_1(&JsValue::from_str(&format!("Proof generation failed: {:?}", e)));
+            return "errog".to_string();
+        }
+    };
+    web_sys::console::log_1(&JsValue::from_str(&format!("Proof generated in: {:?}", now.elapsed())));
     let security_level_bits = proof.security_level_bits();
-    //println!("Proof security (conjectured): {security_level_bits}bit");
+    web_sys::console::log_1(&JsValue::from_str(&format!("Proof security (conjectured): {}bit", security_level_bits)));
 
-    web_sys::console::log_1(&JsValue::from_str("140"));
     let mut proof_bytes = Vec::new();
-    web_sys::console::log_1(&JsValue::from_str("150"));
     proof.serialize_compressed(&mut proof_bytes).unwrap();
-    web_sys::console::log_1(&JsValue::from_str("160"));
-    proof_bytes
-    // println!("Proof size: {:?}KB", proof_bytes.len() / 1024);
+    web_sys::console::log_1(&JsValue::from_str(&format!("Proof size: {:?}KB", proof_bytes.len() / 1024)));
+    hex::encode(&proof_bytes)
     // let mut f = File::create(output_path).unwrap();
     // f.write_all(proof_bytes.as_slice()).unwrap();
     // f.flush().unwrap();

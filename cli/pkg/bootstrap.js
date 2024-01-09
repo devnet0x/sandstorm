@@ -41,7 +41,7 @@ async function run() {
 
         const start = performance.now();
         try {
-            let result = main2("Verify", program_json, public_input_json, proof, program_json, program_json, program_json);
+            let result = await main2("Verify", program_json, public_input_json, proof, null, null, null);
             const end = performance.now();
             const elapsed = end - start;
             console.log("result: ", result);
@@ -64,8 +64,10 @@ async function run() {
         let trace = '';
         let memory = '';
         
+        let programFilename = "array-sum.json" // document.getElementById('program1').files[0].name;
+
         try {
-            const programResponse = await fetch("array-sum.json") // await fetch(document.getElementById('program1').files[0].name);
+            const programResponse = await fetch(programFilename);
             if (programResponse.ok) {
                 program_json = await programResponse.text();
             }
@@ -115,11 +117,20 @@ async function run() {
 
         const start = performance.now();
         try {
-            let dummy = trace;
-            let result = main2("Prove", program_json, public_input_json, dummy, trace, memory, private_input_json);
+            let result = await main2("Prove", program_json, public_input_json, null, trace, memory, private_input_json);
+            //let result = "46FBF3E2B6F1"
             const end = performance.now();
             const elapsed = end - start;
             console.log("result: ", result);
+            let hexString = result; // "Hello World" in hexadecimal
+            let buffer = new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+            let blob = new Blob([buffer], { type: 'application/octet-stream' });
+
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = programFilename.split('.').slice(0, -1).join('.') + '.proof';
+            link.click();
 
             document.getElementById('result1').innerText = "Verification successful! (elapsed time: " + elapsed + " ms)";
         } catch (error) {
