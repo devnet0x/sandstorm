@@ -10,9 +10,10 @@ async function run() {
         let public_input_json = '';
         let proof = '';
         document.getElementById('result').innerText = "Waiting for verification...";
+        document.getElementById('result1').innerText = "";
         
         try {
-            const programResponse = await fetch("array-sum.json") // await fetch(document.getElementById('program').files[0].name);
+            const programResponse = await fetch(document.getElementById('program').files[0].name);
             if (programResponse.ok) {
                 program_json = await programResponse.text();
             }
@@ -65,8 +66,9 @@ async function run() {
         let trace = '';
         let memory = '';
         document.getElementById('result1').innerText = "Waiting for proof...";
+        document.getElementById('result').innerText = "";
 
-        let programFilename = "array-sum.json" // document.getElementById('program1').files[0].name;
+        let programFilename = document.getElementById('program1').files[0].name;
 
         try {
             const programResponse = await fetch(programFilename);
@@ -78,7 +80,7 @@ async function run() {
         }
 
         try {
-            const publicInputResponse = await fetch("air-public-input.json") //await fetch(document.getElementById('publicInput1').files[0].name);
+            const publicInputResponse = await fetch(document.getElementById('publicInput1').files[0].name);
             if (publicInputResponse.ok) {
                 public_input_json = await publicInputResponse.text();
             }
@@ -87,16 +89,16 @@ async function run() {
         }
 
         try {
-            const privateInputResponse = await fetch("air-private-input.json") //await fetch(document.getElementById('publicInput1').files[0].name);
+            const privateInputResponse = await fetch(document.getElementById('privateInput1').files[0].name);
             if (privateInputResponse.ok) {
                 private_input_json = await privateInputResponse.text();
             }
         } catch (error) {
-            console.error('Error fetching public input JSON:', error);
+            console.error('Error fetching private input JSON:', error);
         }
 
         try {
-            const traceResponse = await fetch("trace.bin") //await fetch(document.getElementById('trace1').files[0].name);
+            const traceResponse = await fetch(document.getElementById('trace1').files[0].name);
             if (traceResponse.ok) {
                 const arrayBuffer = await traceResponse.arrayBuffer();
                 const uint8Array = new Uint8Array(arrayBuffer);
@@ -107,7 +109,7 @@ async function run() {
         }
 
         try {
-            const memoryResponse = await fetch("memory.bin") //await fetch(document.getElementById('memory1').files[0].name);
+            const memoryResponse = await fetch(document.getElementById('memory1').files[0].name);
             if (memoryResponse.ok) {
                 const arrayBuffer = await memoryResponse.arrayBuffer();
                 const uint8Array = new Uint8Array(arrayBuffer);
@@ -120,11 +122,10 @@ async function run() {
         const start = performance.now();
         try {
             let result = main2("Prove", program_json, public_input_json, null, trace, memory, private_input_json);
-            //let result = "46FBF3E2B6F1"
             const end = performance.now();
             const elapsed = end - start;
             console.log("result: ", result);
-            let hexString = result; // "Hello World" in hexadecimal
+            let hexString = result; 
             let buffer = new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
 
             let blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -134,11 +135,11 @@ async function run() {
             link.download = programFilename.split('.').slice(0, -1).join('.') + '.proof';
             link.click();
 
-            document.getElementById('result1').innerText = "Verification successful! (elapsed time: " + elapsed + " ms)";
+            document.getElementById('result1').innerText = "Proof generation successful! (elapsed time: " + elapsed + " ms)";
         } catch (error) {
             const end = performance.now();
             const elapsed = end - start;
-            document.getElementById('result1').innerText = "Verification failed!(elapsed time: " + elapsed + " ms)";
+            document.getElementById('result1').innerText = "Proof generation failed!(elapsed time: " + elapsed + " ms)";
         }
     });
 }
