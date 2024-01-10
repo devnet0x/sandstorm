@@ -1,0 +1,14 @@
+{
+  "name": "sandstorm-cli",
+  "version": "0.1.0",
+  "files": [
+    "sandstorm_cli_bg.wasm",
+    "sandstorm_cli.js",
+    "sandstorm_cli.d.ts"
+  ],
+  "module": "sandstorm_cli.js",
+  "types": "sandstorm_cli.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

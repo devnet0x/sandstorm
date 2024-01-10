@@ -1,0 +1,4 @@
+*.proof
+*.bin
+*.json
+!package.json
