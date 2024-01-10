@@ -71,7 +71,7 @@ pub fn start() {
 }
 
 #[wasm_bindgen]
-pub async fn main2(command: String, 
+pub fn main2(command: String, 
     program_json_str: String,
     air_public_input_json_str: String,
     _proof_file: Option<Vec<u8>>, 
@@ -110,12 +110,12 @@ pub async fn main2(command: String,
                 Layout::Starknet => {
                     use claims::starknet::EthVerifierClaim;
                     let claim = EthVerifierClaim::new(program, air_public_input);
-                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str).await
+                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str)
                 }
                 Layout::Recursive => {
                     use claims::recursive::CairoVerifierClaim;
                     let claim = CairoVerifierClaim::new(program, air_public_input);
-                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str).await
+                    execute_command(command, claim, proof_file, trace_file, memory_file, air_private_input_json_str)
                 }
                 _ => unimplemented!(),
             }
@@ -155,7 +155,7 @@ pub async fn main2(command: String,
     }
 }
 
-async fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
+fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
     command: Command,
     claim: Claim,
     proof_file: &[u8],
@@ -178,11 +178,11 @@ async fn execute_command<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWi
                 fri_folding_factor,
                 fri_max_remainder_coeffs,
             );
-            prove(options, air_private_input, &trace_file, &memory_file, claim).await
+            prove(options, air_private_input, &trace_file, &memory_file, claim)
         }
         Command::Verify {
             required_security_bits,
-        } => verify(required_security_bits, &proof_file, claim),
+        } => verify(required_security_bits, &proof_file, claim)
     }
 }
 
@@ -203,7 +203,7 @@ fn verify<Claim: Stark<Fp = impl Field>>(
     "0".to_string()
 }
 
-async fn prove<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
+fn prove<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>>(
     options: ProofOptions,
     private_input_file: String,
     trace_file: &[u8],
@@ -225,16 +225,8 @@ async fn prove<Fp: PrimeField, Claim: Stark<Fp = Fp, Witness = CairoWitness<Fp>>
     let witness = CairoWitness::new(private_input, register_states, memory);
 
     let now = Instant::now();
-    let a=claim.prove(options, witness);
-    let proof = match a.await {
-        Ok(proof) => {
-            proof
-        },
-        Err(e) => {
-            web_sys::console::log_1(&JsValue::from_str(&format!("Proof generation failed: {:?}", e)));
-            return "errog".to_string();
-        }
-    };
+    let proof = pollster::block_on(claim.prove(options, witness)).unwrap();
+
     web_sys::console::log_1(&JsValue::from_str(&format!("Proof generated in: {:?}", now.elapsed())));
     let security_level_bits = proof.security_level_bits();
     web_sys::console::log_1(&JsValue::from_str(&format!("Proof security (conjectured): {}bit", security_level_bits)));

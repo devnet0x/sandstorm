@@ -9,6 +9,7 @@ async function run() {
         let program_json = '';
         let public_input_json = '';
         let proof = '';
+        document.getElementById('result').innerText = "Waiting for verification...";
         
         try {
             const programResponse = await fetch("array-sum.json") // await fetch(document.getElementById('program').files[0].name);
@@ -20,7 +21,7 @@ async function run() {
         }
 
         try {
-            const publicInputResponse = await fetch("air-public-input.json") //await fetch(document.getElementById('publicInput').files[0].name);
+            const publicInputResponse = await fetch(document.getElementById('publicInput').files[0].name);
             if (publicInputResponse.ok) {
                 public_input_json = await publicInputResponse.text();
             }
@@ -29,7 +30,7 @@ async function run() {
         }
 
         try {
-            const proofResponse = await fetch("array-sum.proof") //await fetch(document.getElementById('proof').files[0].name);
+            const proofResponse = await fetch(document.getElementById('proof').files[0].name);
             if (proofResponse.ok) {
                 const arrayBuffer = await proofResponse.arrayBuffer();
                 const uint8Array = new Uint8Array(arrayBuffer);
@@ -41,7 +42,7 @@ async function run() {
 
         const start = performance.now();
         try {
-            let result = await main2("Verify", program_json, public_input_json, proof, null, null, null);
+            let result = main2("Verify", program_json, public_input_json, proof, null, null, null);
             const end = performance.now();
             const elapsed = end - start;
             console.log("result: ", result);
@@ -50,7 +51,7 @@ async function run() {
         } catch (error) {
             const end = performance.now();
             const elapsed = end - start;
-            document.getElementById('result').innerText = "Verification failed!(elapsed time: " + elapsed + " ms)" + error;
+            document.getElementById('result').innerText = "Verification failed!(elapsed time: " + elapsed + " ms)";
         }
     });
 
@@ -63,7 +64,8 @@ async function run() {
         let private_input_json = '';
         let trace = '';
         let memory = '';
-        
+        document.getElementById('result1').innerText = "Waiting for proof...";
+
         let programFilename = "array-sum.json" // document.getElementById('program1').files[0].name;
 
         try {
@@ -117,7 +119,7 @@ async function run() {
 
         const start = performance.now();
         try {
-            let result = await main2("Prove", program_json, public_input_json, null, trace, memory, private_input_json);
+            let result = main2("Prove", program_json, public_input_json, null, trace, memory, private_input_json);
             //let result = "46FBF3E2B6F1"
             const end = performance.now();
             const elapsed = end - start;
@@ -136,7 +138,7 @@ async function run() {
         } catch (error) {
             const end = performance.now();
             const elapsed = end - start;
-            document.getElementById('result1').innerText = "Verification failed!(elapsed time: " + elapsed + " ms)" + error;
+            document.getElementById('result1').innerText = "Verification failed!(elapsed time: " + elapsed + " ms)";
         }
     });
 }

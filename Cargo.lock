@@ -418,18 +418,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.4.13"
+version = "4.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52bdc885e4cacc7f7c9eedc1ef6da641603180c783c41a15c264944deeaab642"
+checksum = "33e92c5c1a78c62968ec57dbc2440366a2d6e5a23faf829970ff1585dc6b18e2"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.4.12"
+version = "4.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb7fb5e4e979aec3be7791562fcba452f94ad85e954da024396433e0e25a79e9"
+checksum = "f4323769dc8a61e2c39ad7dc26f6f2800524691a44d74fe3d1071a5c24db6370"
 dependencies = [
  "anstyle",
  "clap_lex",
@@ -496,7 +496,7 @@ dependencies = [
  "anes",
  "cast",
  "ciborium",
- "clap 4.4.13",
+ "clap 4.4.14",
  "criterion-plot",
  "is-terminal",
  "itertools",
@@ -791,9 +791,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.11"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe9006bed769170c11f845cf00c7c1e9092aeb3f268e007c3e760ac68008070f"
+checksum = "190092ea657667030ac6a35e305e62fc4dd69fd98ac98631e5d3a2b1575a12b5"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -1024,7 +1024,7 @@ dependencies = [
 [[package]]
 name = "ministark"
 version = "0.1.0"
-source = "git+https://github.com/devnet0x/ministark#9bd431101d67878cf833857a1594d62d6f917202"
+source = "git+https://github.com/devnet0x/ministark#2c91dd12f1f2e178a4e0451fb53a3b0d6d9c6854"
 dependencies = [
  "ark-ff 0.4.2",
  "ark-ff-optimized",
@@ -1039,12 +1039,14 @@ dependencies = [
  "rayon",
  "sha2",
  "snafu",
+ "wasm-timer",
+ "web-sys",
 ]
 
 [[package]]
 name = "ministark-gpu"
 version = "0.2.0"
-source = "git+https://github.com/devnet0x/ministark#9bd431101d67878cf833857a1594d62d6f917202"
+source = "git+https://github.com/devnet0x/ministark#2c91dd12f1f2e178a4e0451fb53a3b0d6d9c6854"
 dependencies = [
  "ark-ff 0.4.2",
  "ark-ff-optimized",
