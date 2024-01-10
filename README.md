@@ -16,7 +16,7 @@
 
 Sandstorm is a Cairo prover built on top of miniSTARK. The prover was built by reverse engineering [StarkWare's open source verifier](https://github.com/starkware-libs/starkex-contracts) and was used to submit the first independent proof to StarkWare's Ethereum verifier (see tweet [here](https://twitter.com/andrewmilson/status/1686292241990692864)).
 
-You can find Sandstorm on Andrew Wilson repository.
+You can find Sandstorm on [Andrew Milson repository](https://github.com/andrewmilson/ministark/).
 
 This is just a slightly modified version to demonstrate that we can run Sandstorm in a web browser with WASM. There is a lot of wasm optimization to be done to achieve real Sandstorm speed.
 
