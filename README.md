@@ -14,11 +14,11 @@
 > **Warning**
 > this code is new and will change in future versions. Please try it out and provide feedback.
 
-Sandstorm is a Cairo prover built on top of miniSTARK. The prover was built by reverse engineering [StarkWare's open source verifier](https://github.com/starkware-libs/starkex-contracts) and was used to submit the first independent proof to StarkWare's Ethereum verifier (see tweet [here](https://twitter.com/andrewmilson/status/1686292241990692864)).
+Sandstorm is a Cairo prover built by Andrew Milson on top of miniSTARK. The prover was built by reverse engineering [StarkWare's open source verifier](https://github.com/starkware-libs/starkex-contracts) and was used to submit the first independent proof to StarkWare's Ethereum verifier (see tweet [here](https://twitter.com/andrewmilson/status/1686292241990692864)).
 
 You can find Sandstorm on [Andrew Milson repository](https://github.com/andrewmilson/ministark/).
 
-This is just a slightly modified version to demonstrate that we can run Sandstorm in a web browser with WASM. There is a lot of wasm optimization to be done to achieve real Sandstorm speed.
+This is just a slightly modified version to learn Wasm and demonstrate that we can run Sandstorm in a web browser with Wasm. There is a lot of wasm optimization to be done to achieve real Sandstorm speed.
 
 This release uses a slightly [modified](https://github.com/devnet0x/ministark) version of Ministark to support WASM.
 
@@ -33,3 +33,13 @@ As an example, running in Firefox on a virtualized machine with 6 AMD EPYC 7282 
 
 ## Notes
 1) When generating the proof the browser will store automatically the .proof file in your Download folder.
+
+## Screenshots
+Verification Ok
+![Verification Ok](./verification_ok.png)
+
+Verificaton failed
+![Verification failed](./verification_failed.png)
+
+Proof generation
+![Verification Ok](./proof_ok.png)
